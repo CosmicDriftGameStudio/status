@@ -8,42 +8,49 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #0a0a0a;
+      background: #050A14;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Courier New', monospace;
-      color: #33ff33;
+      color: #9D4EDD;
     }
 
     .terminal {
-      background: #0d0d0d;
-      border: 2px solid #33ff33;
-      box-shadow: 0 0 20px rgba(51, 255, 51, 0.3), inset 0 0 60px rgba(0, 0, 0, 0.5);
-      padding: 30px 40px;
-      max-width: 500px;
+      background: #0A1628;
+      border: 3px solid #9D4EDD;
+      box-shadow:
+        0 0 0 1px #050A14,
+        0 0 0 4px #9D4EDD,
+        0 0 40px rgba(157, 78, 221, 0.3),
+        inset 0 0 80px rgba(5, 10, 20, 0.8);
+      padding: 35px 45px;
+      max-width: 520px;
       width: 90%;
     }
 
     .header {
-      border-bottom: 1px solid #33ff33;
-      padding-bottom: 15px;
-      margin-bottom: 20px;
+      border-bottom: 2px solid #9D4EDD;
+      padding-bottom: 18px;
+      margin-bottom: 25px;
       text-align: center;
     }
 
     .header h1 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: normal;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
+      color: #00D9FF;
+      text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
     }
 
     .status-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dotted #1a4d1a;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(157, 78, 221, 0.2);
     }
 
     .status-row:last-child {
@@ -51,57 +58,82 @@
     }
 
     .label {
-      color: #888;
+      color: #8B9DC3;
+      font-size: 13px;
+      letter-spacing: 1px;
     }
 
     .value {
       font-weight: bold;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
     }
 
-    .value.ok { color: #33ff33; }
-    .value.warn { color: #ffff33; }
-    .value.error { color: #ff3333; }
+    .value.ok { color: #00FF88; }
+    .value.warn { color: #FFB800; }
+    .value.error { color: #FF006E; }
 
     .indicator {
       display: inline-block;
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      margin-right: 8px;
+      margin-right: 10px;
       animation: pulse 2s infinite;
     }
 
-    .indicator.ok { background: #33ff33; box-shadow: 0 0 10px #33ff33; }
-    .indicator.warn { background: #ffff33; box-shadow: 0 0 10px #ffff33; }
-    .indicator.error { background: #ff3333; box-shadow: 0 0 10px #ff3333; }
+    .indicator.ok { background: #00FF88; box-shadow: 0 0 12px #00FF88; }
+    .indicator.warn { background: #FFB800; box-shadow: 0 0 12px #FFB800; }
+    .indicator.error { background: #FF006E; box-shadow: 0 0 12px #FF006E; }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      50% { opacity: 0.4; }
     }
 
     .footer {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 1px solid #33ff33;
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 2px solid #9D4EDD;
       text-align: center;
       font-size: 11px;
-      color: #555;
+      color: #8B9DC3;
+      letter-spacing: 1px;
+    }
+
+    .footer span {
+      color: #00D9FF;
     }
 
     .loading {
       text-align: center;
-      padding: 20px;
-      color: #555;
+      padding: 30px;
+      color: #8B9DC3;
     }
 
     .blink {
       animation: blink 1s infinite;
+      color: #00D9FF;
     }
 
     @keyframes blink {
       0%, 50% { opacity: 1; }
       51%, 100% { opacity: 0; }
+    }
+
+    .big-status {
+      text-align: center;
+      padding: 15px 0 20px 0;
+      font-size: 14px;
+      letter-spacing: 2px;
+      border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+      margin-bottom: 5px;
+    }
+
+    .big-status .indicator {
+      width: 10px;
+      height: 10px;
     }
   </style>
 </head>
@@ -112,11 +144,11 @@
     </div>
 
     <div id="status-content">
-      <div class="loading">CONNECTING<span class="blink">_</span></div>
+      <div class="loading">ESTABLISHING UPLINK<span class="blink">_</span></div>
     </div>
 
     <div class="footer">
-      LAST UPDATE: <span id="last-update">--:--:--</span>
+      LAST SYNC: <span id="last-update">--:--:--</span>
     </div>
   </div>
 
@@ -138,39 +170,38 @@
         const redisOk = data.services?.redis?.ok;
 
         content.innerHTML = `
-          <div class="status-row">
-            <span class="label">STATUS</span>
+          <div class="big-status">
             <span class="value ${isOk ? 'ok' : 'error'}">
               <span class="indicator ${isOk ? 'ok' : 'error'}"></span>
-              ${isOk ? 'ALL SYSTEMS OPERATIONAL' : 'DEGRADED'}
+              ${isOk ? 'ALL SYSTEMS OPERATIONAL' : 'SYSTEM DEGRADED'}
             </span>
           </div>
           <div class="status-row">
-            <span class="label">API SERVER</span>
+            <span class="label">COMMAND RELAY</span>
             <span class="value ok">
               <span class="indicator ok"></span>ONLINE
             </span>
           </div>
           <div class="status-row">
-            <span class="label">DATABASE</span>
+            <span class="label">MEMORY BANKS</span>
             <span class="value ${dbOk ? 'ok' : 'error'}">
               <span class="indicator ${dbOk ? 'ok' : 'error'}"></span>
-              ${dbOk ? 'CONNECTED' : 'OFFLINE'} ${data.services?.database?.latency ? `(${data.services.database.latency}ms)` : ''}
+              ${dbOk ? 'LINKED' : 'OFFLINE'} ${data.services?.database?.latency ? `// ${data.services.database.latency}ms` : ''}
             </span>
           </div>
           <div class="status-row">
-            <span class="label">REDIS CACHE</span>
+            <span class="label">BUFFER RELAY</span>
             <span class="value ${redisOk ? 'ok' : 'error'}">
               <span class="indicator ${redisOk ? 'ok' : 'error'}"></span>
-              ${redisOk ? 'CONNECTED' : 'OFFLINE'} ${data.services?.redis?.latency ? `(${data.services.redis.latency}ms)` : ''}
+              ${redisOk ? 'ACTIVE' : 'OFFLINE'} ${data.services?.redis?.latency ? `// ${data.services.redis.latency}ms` : ''}
             </span>
           </div>
           <div class="status-row">
-            <span class="label">RESPONSE TIME</span>
+            <span class="label">PING DELAY</span>
             <span class="value ${latency < 500 ? 'ok' : latency < 1000 ? 'warn' : 'error'}">${latency}ms</span>
           </div>
           <div class="status-row">
-            <span class="label">VERSION</span>
+            <span class="label">BUILD ID</span>
             <span class="value ok">${data.version || 'N/A'}</span>
           </div>
         `;
@@ -179,15 +210,14 @@
 
       } catch (error) {
         content.innerHTML = `
-          <div class="status-row">
-            <span class="label">STATUS</span>
+          <div class="big-status">
             <span class="value error">
               <span class="indicator error"></span>
-              CONNECTION FAILED
+              UPLINK FAILED
             </span>
           </div>
           <div class="status-row">
-            <span class="label">ERROR</span>
+            <span class="label">ERROR CODE</span>
             <span class="value error">${error.message}</span>
           </div>
         `;
@@ -195,10 +225,7 @@
       }
     }
 
-    // Initial fetch
     fetchStatus();
-
-    // Refresh every 30 seconds
     setInterval(fetchStatus, 30000);
   </script>
 </body>
