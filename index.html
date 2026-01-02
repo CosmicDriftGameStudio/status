@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Conquest - System Status</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      color: #33ff33;
+    }
+
+    .terminal {
+      background: #0d0d0d;
+      border: 2px solid #33ff33;
+      box-shadow: 0 0 20px rgba(51, 255, 51, 0.3), inset 0 0 60px rgba(0, 0, 0, 0.5);
+      padding: 30px 40px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .header {
+      border-bottom: 1px solid #33ff33;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: normal;
+      letter-spacing: 2px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dotted #1a4d1a;
+    }
+
+    .status-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #888;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+
+    .value.ok { color: #33ff33; }
+    .value.warn { color: #ffff33; }
+    .value.error { color: #ff3333; }
+
+    .indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    .indicator.ok { background: #33ff33; box-shadow: 0 0 10px #33ff33; }
+    .indicator.warn { background: #ffff33; box-shadow: 0 0 10px #ffff33; }
+    .indicator.error { background: #ff3333; box-shadow: 0 0 10px #ff3333; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .footer {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #33ff33;
+      text-align: center;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #555;
+    }
+
+    .blink {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="header">
+      <h1>SPACE CONQUEST // SYSTEM STATUS</h1>
+    </div>
+
+    <div id="status-content">
+      <div class="loading">CONNECTING<span class="blink">_</span></div>
+    </div>
+
+    <div class="footer">
+      LAST UPDATE: <span id="last-update">--:--:--</span>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://api-sc.cosmicdriftgamestudio.com/health';
+
+    async function fetchStatus() {
+      const content = document.getElementById('status-content');
+      const lastUpdate = document.getElementById('last-update');
+
+      try {
+        const start = Date.now();
+        const response = await fetch(API_URL);
+        const latency = Date.now() - start;
+        const data = await response.json();
+
+        const isOk = data.status === 'ok';
+        const dbOk = data.services?.database?.ok;
+        const redisOk = data.services?.redis?.ok;
+
+        content.innerHTML = `
+          <div class="status-row">
+            <span class="label">STATUS</span>
+            <span class="value ${isOk ? 'ok' : 'error'}">
+              <span class="indicator ${isOk ? 'ok' : 'error'}"></span>
+              ${isOk ? 'ALL SYSTEMS OPERATIONAL' : 'DEGRADED'}
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="label">API SERVER</span>
+            <span class="value ok">
+              <span class="indicator ok"></span>ONLINE
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="label">DATABASE</span>
+            <span class="value ${dbOk ? 'ok' : 'error'}">
+              <span class="indicator ${dbOk ? 'ok' : 'error'}"></span>
+              ${dbOk ? 'CONNECTED' : 'OFFLINE'} ${data.services?.database?.latency ? `(${data.services.database.latency}ms)` : ''}
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="label">REDIS CACHE</span>
+            <span class="value ${redisOk ? 'ok' : 'error'}">
+              <span class="indicator ${redisOk ? 'ok' : 'error'}"></span>
+              ${redisOk ? 'CONNECTED' : 'OFFLINE'} ${data.services?.redis?.latency ? `(${data.services.redis.latency}ms)` : ''}
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="label">RESPONSE TIME</span>
+            <span class="value ${latency < 500 ? 'ok' : latency < 1000 ? 'warn' : 'error'}">${latency}ms</span>
+          </div>
+          <div class="status-row">
+            <span class="label">VERSION</span>
+            <span class="value ok">${data.version || 'N/A'}</span>
+          </div>
+        `;
+
+        lastUpdate.textContent = new Date().toLocaleTimeString();
+
+      } catch (error) {
+        content.innerHTML = `
+          <div class="status-row">
+            <span class="label">STATUS</span>
+            <span class="value error">
+              <span class="indicator error"></span>
+              CONNECTION FAILED
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="label">ERROR</span>
+            <span class="value error">${error.message}</span>
+          </div>
+        `;
+        lastUpdate.textContent = new Date().toLocaleTimeString();
+      }
+    }
+
+    // Initial fetch
+    fetchStatus();
+
+    // Refresh every 30 seconds
+    setInterval(fetchStatus, 30000);
+  </script>
+</body>
+</html>
