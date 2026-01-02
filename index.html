@@ -177,31 +177,31 @@
             </span>
           </div>
           <div class="status-row">
-            <span class="label">COMMAND RELAY</span>
+            <span class="label">NEXUS CORE</span>
             <span class="value ok">
               <span class="indicator ok"></span>ONLINE
             </span>
           </div>
           <div class="status-row">
-            <span class="label">MEMORY BANKS</span>
+            <span class="label">DATA VAULT</span>
             <span class="value ${dbOk ? 'ok' : 'error'}">
               <span class="indicator ${dbOk ? 'ok' : 'error'}"></span>
               ${dbOk ? 'LINKED' : 'OFFLINE'} ${data.services?.database?.latency ? `// ${data.services.database.latency}ms` : ''}
             </span>
           </div>
           <div class="status-row">
-            <span class="label">BUFFER RELAY</span>
+            <span class="label">CACHE GRID</span>
             <span class="value ${redisOk ? 'ok' : 'error'}">
               <span class="indicator ${redisOk ? 'ok' : 'error'}"></span>
               ${redisOk ? 'ACTIVE' : 'OFFLINE'} ${data.services?.redis?.latency ? `// ${data.services.redis.latency}ms` : ''}
             </span>
           </div>
           <div class="status-row">
-            <span class="label">PING DELAY</span>
+            <span class="label">SIGNAL LATENCY</span>
             <span class="value ${latency < 500 ? 'ok' : latency < 1000 ? 'warn' : 'error'}">${latency}ms</span>
           </div>
           <div class="status-row">
-            <span class="label">BUILD ID</span>
+            <span class="label">FIRMWARE</span>
             <span class="value ok">${data.version || 'N/A'}</span>
           </div>
         `;
