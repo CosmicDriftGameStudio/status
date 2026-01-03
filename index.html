@@ -204,10 +204,10 @@
             <span class="label">FIRMWARE</span>
             <span class="value ok">${data.version || 'N/A'}</span>
           </div>
-          ${data.data ? `
+          ${data.dbSize ? `
           <div class="status-row">
-            <span class="label">REGISTERED PILOTS</span>
-            <span class="value ok">${data.data.users || 0}</span>
+            <span class="label">DATA NODES</span>
+            <span class="value ok">${data.dbSize.formatted}</span>
           </div>
           ` : ''}
         `;
